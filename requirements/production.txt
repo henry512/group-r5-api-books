@@ -1,1 +1,2 @@
 -r base.txt
+uvicorn==0.17.0
