@@ -1,7 +1,8 @@
-from operator import contains
 from dependency_injector import containers, providers
 from logging.config import fileConfig
 from src.services import BookService
+from src.infrastructure import PostgresContext
+from src.repositories import BookRepository
 
 
 class Container(containers.DeclarativeContainer):
@@ -12,7 +13,16 @@ class Container(containers.DeclarativeContainer):
         fname="logging.ini",
     )
     
+    postgres_context = providers.Singleton(
+        PostgresContext,
+        configuration=config
+    )
+    book_repository = providers.Singleton(
+        BookRepository,
+        context=postgres_context
+    )
     book_service = providers.Singleton(
-        BookService
+        BookService,
+        repository=book_repository
     )
     

@@ -23,22 +23,23 @@ async def get(
     description: Optional[str]=None,
     service: IBookService=Depends(Provide[Container.book_service])
 ):
+    books = await service.get_books(
+        BookFiltered(
+            operator=operator,
+            id=id,
+            title=title,
+            subtitle=subtitle,
+            author=author,
+            category=category,
+            datetime_publication=datetime_publication,
+            editor=editor,
+            description=description,
+        )
+    )
     return BaseResponseDTO(
         api_version="1.0.0", 
         method=f"{__name__}.get", 
-        data=service.get_books(
-            BookFiltered(
-                operator=operator,
-                id=id,
-                title=title,
-                subtitle=subtitle,
-                author=author,
-                category=category,
-                datetime_publication=datetime_publication,
-                editor=editor,
-                description=description,
-            )
-        )
+        data=books
     )
 
 

@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import List
 from src.domains import BookFiltered, BookDTO
-from src.repositories import IBookRepository
+from src.infrastructure import IPostgresContext
 
 
-class IBookService(ABC):
+class IBookRepository(ABC):
     @abstractmethod
     async def get_books(self, filters: BookFiltered) -> BookDTO:
         raise NotImplementedError
@@ -14,9 +14,9 @@ class IBookService(ABC):
         raise NotImplementedError
     
 
-class BookService(IBookService):
-    def __init__(self, repository: IBookRepository):
-        self.repository = repository
+class BookRepository(IBookRepository):
+    def __init__(self, context: IPostgresContext):
+        self.context = context
     
     async def get_books(self, filters: BookFiltered) -> BookDTO:
         return BookDTO(books=[])

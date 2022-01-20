@@ -1,2 +1,2 @@
-variable1: mi variable 1
-variable2: mi variable 2
+database:
+  connection: postgresql://postgres:root@localhost1/postgres
