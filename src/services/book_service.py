@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 from src.domains import BookFiltered, BookDTO
 from src.repositories import IBookRepository
+from src.infrastructure import IHttpClient
 
 
 class IBookService(ABC):
@@ -15,8 +16,9 @@ class IBookService(ABC):
     
 
 class BookService(IBookService):
-    def __init__(self, repository: IBookRepository):
+    def __init__(self, repository: IBookRepository, http_client: IHttpClient):
         self.repository = repository
+        self.http_client = http_client
     
     async def get_books(self, filters: BookFiltered) -> BookDTO:
         return BookDTO(books=[])

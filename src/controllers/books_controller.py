@@ -46,5 +46,6 @@ async def get(
 @router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 async def group_deleted(
     ids: List[str],
+    service: IBookService=Depends(Provide[Container.book_service])
 ):
-    return "group_deleted books"
+    return

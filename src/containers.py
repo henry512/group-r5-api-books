@@ -1,7 +1,7 @@
 from dependency_injector import containers, providers
 from logging.config import fileConfig
 from src.services import BookService
-from src.infrastructure import PostgresContext
+from src.infrastructure import PostgresContext, HttpClient
 from src.repositories import BookRepository
 
 
@@ -17,12 +17,16 @@ class Container(containers.DeclarativeContainer):
         PostgresContext,
         configuration=config
     )
+    http_client = providers.Singleton(
+        HttpClient
+    )
     book_repository = providers.Singleton(
         BookRepository,
         context=postgres_context
     )
     book_service = providers.Singleton(
         BookService,
-        repository=book_repository
+        repository=book_repository,
+        http_client=http_client
     )
     
