@@ -1,5 +1,6 @@
-from fastapi import FastAPI, APIRouter
-from .controllers import router_books
+from fastapi import FastAPI
+from src.controllers import router_books
+from src.containers import Container
 
 
 description = """
@@ -27,9 +28,5 @@ app = FastAPI(
         "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
     },
 )
-
-# Adding router controllers
-api_router = APIRouter()
-api_router.include_router(router_books, prefix="/books", tags=["Books"])
-
-app.include_router(api_router)
+app.container = Container()
+app.include_router(router_books)

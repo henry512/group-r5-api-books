@@ -1,4 +1,5 @@
 from uvicorn import run
+import pathlib
 from src.app import app
 
 
@@ -26,4 +27,10 @@ if __name__ == '__main__':
     @Version= 1.0.0
     """)
     # run("manage:app", host="0.0.0.0", port=80, log_level="info", reload=False, workers=4)
-    run("manage:app", host="0.0.0.0", port=5000, log_level="info", reload=True)
+    run(
+        "manage:app", 
+        host="0.0.0.0", 
+        port=5000, 
+        log_level="info", 
+        reload=True
+    )
