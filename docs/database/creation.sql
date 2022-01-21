@@ -14,7 +14,7 @@ CREATE TABLE public.books (
 	id varchar NOT NULL,
 	title varchar NOT NULL,
 	subtitle varchar NULL,
-	datetime_publications timestamp NOT NULL,
+	datetime_publications date NOT NULL,
 	description text NULL,
 	image varchar NULL,
 	publishing_id serial4 NOT NULL,
