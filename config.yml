@@ -1,2 +1,10 @@
 database:
-  connection: postgresql://postgres:root@localhost1/postgres
+  connection: postgresql://postgres:root@localhost/postgres
+  schema: public
+  tables:
+    books: books
+    authors: authors
+    categories: categories
+    publishing: publishing
+    books_authors: books_authors
+    books_categories: books_categories
