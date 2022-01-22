@@ -24,4 +24,4 @@ class BookService(IBookService):
         return await self.repository.get_books(filters)
     
     async def delete_book(self, id: str):
-        return
+        await self.repository.delete_book(id)

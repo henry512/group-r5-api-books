@@ -1,7 +1,7 @@
 from datetime import date
 from src.domains import OperatorEnum, BaseResponseDTO, BookFiltered
-from typing import List, Optional
-from fastapi import APIRouter, status, Depends
+from typing import Optional
+from fastapi import APIRouter, status, Depends, Response
 from dependency_injector.wiring import inject, Provide
 from src.containers import Container
 from src.services import IBookService
@@ -47,8 +47,10 @@ async def get(
 
 
 @router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
+@inject
 async def group_deleted(
     id: str,
     service: IBookService=Depends(Provide[Container.book_service])
 ):
-    return
+    await service.delete_book(id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

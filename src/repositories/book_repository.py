@@ -129,4 +129,9 @@ class BookRepository(IBookRepository):
         return BookDTO(books=[])
     
     async def delete_book(self, id: str):
-        return
+        query: QueryBuilder = (
+            Query.from_(self._table_books)
+            .where(self._table_books.id == id)
+            .delete()
+        )
+        await self._context.execute_query(query.get_sql())
