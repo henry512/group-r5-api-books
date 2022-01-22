@@ -1,5 +1,5 @@
-from typing import List, Optional
-from src.domains import BookEntity
+from typing import List
+from src.domains.book_entity import BookEntity
 from pydantic import BaseModel
 
 

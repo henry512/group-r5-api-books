@@ -1,3 +1,4 @@
+from datetime import date
 from src.domains import OperatorEnum, BaseResponseDTO, BookFiltered
 from typing import List, Optional
 from fastapi import APIRouter, status, Depends
@@ -16,21 +17,23 @@ async def get(
     id: Optional[str]=None,
     title: Optional[str]=None, 
     subtitle: Optional[str]=None,
-    author: Optional[str]=None,
-    category: Optional[str]=None,
-    datetime_publication: Optional[str]=None,
+    authors: Optional[str]=None,
+    categories: Optional[str]=None,
+    datetime_publication: Optional[date]=None,
     editor: Optional[str]=None,
     description: Optional[str]=None,
     service: IBookService=Depends(Provide[Container.book_service])
 ):
+    # TODO: agregar validación para que se implemente 1 filtro almenos
+    
     books = await service.get_books(
         BookFiltered(
             operator=operator,
             id=id,
             title=title,
             subtitle=subtitle,
-            author=author,
-            category=category,
+            authors=authors,
+            categories=categories,
             datetime_publication=datetime_publication,
             editor=editor,
             description=description,
@@ -45,7 +48,7 @@ async def get(
 
 @router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 async def group_deleted(
-    ids: List[str],
+    id: str,
     service: IBookService=Depends(Provide[Container.book_service])
 ):
     return

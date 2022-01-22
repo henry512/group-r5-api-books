@@ -11,7 +11,7 @@ class IBookService(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    async def group_delete_books(self, ids: List[str]):
+    async def delete_book(self, id: str):
         raise NotImplementedError
     
 
@@ -21,7 +21,7 @@ class BookService(IBookService):
         self.http_client = http_client
     
     async def get_books(self, filters: BookFiltered) -> BookDTO:
-        return BookDTO(books=[])
+        return await self.repository.get_books(filters)
     
-    async def group_delete_books(self, ids: List[str]):
+    async def delete_book(self, id: str):
         return

@@ -22,7 +22,8 @@ class Container(containers.DeclarativeContainer):
     )
     book_repository = providers.Singleton(
         BookRepository,
-        context=postgres_context
+        context=postgres_context,
+        configuration=config
     )
     book_service = providers.Singleton(
         BookService,
