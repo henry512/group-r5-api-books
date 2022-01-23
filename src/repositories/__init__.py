@@ -1,1 +1,2 @@
 from .book_repository import IBookRepository, BookRepository
+from .book_external_repository import IBookExternalRepository, BookExternalRepository

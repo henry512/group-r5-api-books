@@ -2,7 +2,8 @@ from dependency_injector import containers, providers
 from logging.config import fileConfig
 from src.services import BookService
 from src.infrastructure import PostgresContext, HttpClient
-from src.repositories import BookRepository
+from src.repositories import BookRepository, BookExternalRepository
+from fastapi import BackgroundTasks
 
 
 class Container(containers.DeclarativeContainer):
@@ -25,9 +26,18 @@ class Container(containers.DeclarativeContainer):
         context=postgres_context,
         configuration=config
     )
+    book_external_repository = providers.Singleton(
+        BookExternalRepository,
+        http_client=http_client,
+        configuration=config
+    )
+    background_task = providers.Singleton(
+        BackgroundTasks
+    )
     book_service = providers.Singleton(
         BookService,
-        repository=book_repository,
-        http_client=http_client
+        book_repository=book_repository,
+        book_external_repository=book_external_repository,
+        background_task=background_task
     )
     

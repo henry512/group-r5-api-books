@@ -8,3 +8,8 @@ database:
     publishing: publishing
     books_authors: books_authors
     books_categories: books_categories
+open_api:
+  google_books:
+    base_url: https://www.googleapis.com/books/v1/volumes
+  open_libra:
+    base_url: https://www.etnassoft.com/api/v1/get

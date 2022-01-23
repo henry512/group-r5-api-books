@@ -1,23 +1,23 @@
 from abc import ABC, abstractmethod
-from typing import Optional, Any
+from typing import Optional, Any, ByteString, Tuple
 from aiohttp import ClientSession
 
 
 class IHttpClient(ABC):
     @abstractmethod
-    async def get(self, url: str) -> Any:
+    async def get(self, url: str) -> Tuple[Optional[ByteString], int]:
         raise NotImplementedError
 
     @abstractmethod
-    async def post(self, url: str, data: Any) -> Any:
+    async def post(self, url: str, data: Any) -> Tuple[Optional[ByteString], int]:
         raise NotImplementedError
     
     @abstractmethod
-    async def put(self, url: str, data: Any) -> Any:
+    async def put(self, url: str, data: Any) -> Tuple[Optional[ByteString], int]:
         raise NotImplementedError
     
     @abstractmethod
-    async def delete(self, url: str) -> Any:
+    async def delete(self, url: str) -> Tuple[Optional[ByteString], int]:
         raise NotImplementedError
     
     
@@ -29,26 +29,21 @@ class HttpClient(IHttpClient):
         if self._client_session:
             self._client_session.close()
         
-    async def get(self, url: str) -> Any:
+    async def get(self, url: str) -> Tuple[Optional[ByteString], int]:
         async with self._get_session_connection().get(url) as res:
             try:
-                return await res.read()
+                return tuple([await res.read(), res.status])
             except Exception as error:
                 print(f"Http Client Exception has occurred: \n Error: {error} \n URL: {url} \n")
                 raise
     
-    async def post(self, url: str, data: Any) -> Any:
-        async with self._get_session_connection().post(url, data=bytes(data)) as res:
-            try:
-                return await res.read()
-            except Exception as error:
-                print(f"Http Client Exception has occurred: \n Error: {error} \n URL: {url} \n")
-                raise
-    
-    async def put(self, url: str, data: Any) -> Any:
+    async def post(self, url: str, data: Any) -> Tuple[Optional[ByteString], int]:
         raise NotImplementedError
     
-    async def delete(self, url: str) -> Any:
+    async def put(self, url: str, data: Any) -> Tuple[Optional[ByteString], int]:
+        raise NotImplementedError
+    
+    async def delete(self, url: str) -> Tuple[Optional[ByteString], int]:
         raise NotImplementedError
 
     def _get_session_connection(self) -> ClientSession:

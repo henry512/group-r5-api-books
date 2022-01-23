@@ -51,7 +51,7 @@ class BookRepository(IBookRepository):
                 self._table_books.subtitle,                
                 self._table_books.description,                
                 self._table_books.image,                
-                self._table_books.datetime_publications,                
+                self._table_books.publisher_date,                
                 self._table_authors.name.as_("authors"),
                 self._table_categories.name.as_("categories"),
                 self._table_publishing.name.as_("publishing"),
@@ -90,7 +90,7 @@ class BookRepository(IBookRepository):
             any_criterian.append(self._table_books.description.like(f'%{str(filters.description)}%'))
             
         if filters.datetime_publication:
-            any_criterian.append(self._table_books.datetime_publication == filters.datetime_publication)
+            any_criterian.append(self._table_books.publisher_date == filters.datetime_publication)
             
         if filters.author:
             any_criterian.append(self._table_authors.name.like(f'%{str(filters.author)}%'))
@@ -106,21 +106,21 @@ class BookRepository(IBookRepository):
         
         if not result.empty:
             books_group = [groups for _, groups in result.groupby("id")]
-            books: List[BookEntity] = []
-            for item in books_group:
+            books: List[BookEntity] = list()
+            for book in books_group:
                 books.append(
                     BookEntity(
-                        id = item["id"][0],
-                        title = item["title"][0],
-                        subtitle = item["subtitle"][0],
-                        description = item["description"][0],
+                        id = book["id"][0],
+                        title = book["title"][0],
+                        subtitle = book["subtitle"][0],
+                        description = book["description"][0],
                         datetime_publication = datetime.strptime(
-                            str(item["datetime_publications"][0]), '%Y-%m-%d'
+                            str(book["publisher_date"][0]), '%Y-%m-%d'
                         ).date(),
-                        editor = item["publishing"][0],
-                        image_link = item["image"][0],
-                        authors = set(item["authors"].to_list()),
-                        categories = set(item["categories"].to_list()),
+                        editor = book["publishing"][0],
+                        image_link = book["image"][0],
+                        authors = set(book["authors"].to_list()),
+                        categories = set(book["categories"].to_list()),
                         source = SourceEnum.internal
                     )
                 )

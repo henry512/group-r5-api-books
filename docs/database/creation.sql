@@ -3,7 +3,6 @@
 CREATE SCHEMA public AUTHORIZATION postgres;
 
 
-
 -- public.books definition
 
 -- Drop table
@@ -14,12 +13,11 @@ CREATE TABLE public.books (
 	id varchar NOT NULL,
 	title varchar NOT NULL,
 	subtitle varchar NULL,
-	datetime_publications date NOT NULL,
 	description text NULL,
 	image varchar NULL,
-	publishing_id serial4 NOT NULL,
-	CONSTRAINT books_pk PRIMARY KEY (id),
-	CONSTRAINT books_un UNIQUE (title)
+	publishing_id serial4 NULL,
+	publisher_date varchar NULL,
+	CONSTRAINT books_pk PRIMARY KEY (id)
 );
 
 
