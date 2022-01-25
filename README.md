@@ -34,7 +34,7 @@ python manage.py
 
 ### Install Requirements Test
 ```bash
-pip install -r requirements/development.txt
+pip install -r requirements/test.txt
 ```
 ### Run Test
 ```bash
