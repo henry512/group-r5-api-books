@@ -40,3 +40,7 @@ class PostgresContext(IPostgresContext):
             )
         except Exception:
             raise
+        
+    async def __del__(self):
+        if self._engine:
+            await self._engine.dispose()

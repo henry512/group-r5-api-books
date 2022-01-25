@@ -41,7 +41,7 @@ class Book(Base):
     publisher_date = Column(String, nullable=True)
     image = Column(String, nullable=True)
     
-    publishing_id = Column(Integer, ForeignKey('publishing.id'))
+    publishing_id = Column(Integer, ForeignKey('publishing.id'), nullable=True)
     publisher = relationship("Publisher", backref=backref("books", lazy=True))
     
     authors = relationship("Author", secondary=books_authors, backref=backref("books", lazy=True))

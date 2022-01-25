@@ -25,10 +25,6 @@ class HttpClient(IHttpClient):
     def __init__(self):
         self._client_session: Optional[ClientSession] = None
         
-    def __del__(self):
-        if self._client_session:
-            self._client_session.close()
-        
     async def get(self, url: str) -> Tuple[Optional[ByteString], int]:
         async with self._get_session_connection().get(url) as res:
             try:
@@ -50,3 +46,7 @@ class HttpClient(IHttpClient):
         if self._client_session is None:
             self._client_session = ClientSession()
         return self._client_session
+    
+    async def __del__(self):
+        if self._client_session:
+            await self._client_session.close()

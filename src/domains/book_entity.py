@@ -3,8 +3,8 @@ from pydantic import BaseModel
 
 
 class BookEntity(BaseModel):
-    id: str
-    title: str 
+    id: Optional[str]
+    title: Optional[str] 
     subtitle: Optional[str]
     authors: Optional[Set[str]]
     categories: Optional[Set[str]]

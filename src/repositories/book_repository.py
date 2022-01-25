@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 from src.domains import BookFiltered, BookDTO, BookEntity, SourceEnum
 from src.infrastructure import IPostgresContext
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload, aliased
-from sqlalchemy import or_, delete
+from sqlalchemy import or_, delete, func
 from src.domains import Book, Publisher, Author, Category
 
 
@@ -18,7 +18,7 @@ class IBookRepository(ABC):
         raise NotImplementedError
     
     @abstractmethod
-    async def save_books(self, books: List[BookEntity]):
+    async def save_book(self, book: BookEntity):
         raise NotImplementedError
     
 
@@ -48,28 +48,28 @@ class BookRepository(IBookRepository):
         any_criterian = list()
         
         if filters.id:
-            any_criterian.append(Book.id.like(f"%{filters.id}%"))
+            any_criterian.append(func.lower(Book.id).like(f"%{filters.id.lower()}%"))
             
         if filters.title:
-            any_criterian.append(Book.title.like(f"%{filters.title}%"))
+            any_criterian.append(func.lower(Book.title).like(f"%{filters.title.lower()}%"))
             
         if filters.subtitle:
-            any_criterian.append(Book.subtitle.like(f"%{filters.subtitle}%"))
+            any_criterian.append(func.lower(Book.subtitle).like(f"%{filters.subtitle.lower()}%"))
             
         if filters.description:
-            any_criterian.append(Book.description.like(f"%{filters.description}%"))
+            any_criterian.append(func.lower(Book.description).like(f"%{filters.description.lower()}%"))
             
         if filters.datetime_publication:
             any_criterian.append(Book.publisher_date == filters.datetime_publication)
             
         if filters.author:
-            any_criterian.append(alias_author.name.like(f"%{filters.author}%"))
+            any_criterian.append(func.lower(alias_author.name).like(f"%{filters.author.lower()}%"))
             
         if filters.category:
-            any_criterian.append(alias_category.name.like(f"%{filters.category}%"))
+            any_criterian.append(func.lower(alias_category.name).like(f"%{filters.category.lower()}%"))
             
         if filters.editor:
-            any_criterian.append(alias_publisher.name.like(f"%{filters.editor}%"))
+            any_criterian.append(func.lower(alias_publisher.name).like(f"%{filters.editor.lower()}%"))
             
         if not any_criterian:
             return books
@@ -115,21 +115,57 @@ class BookRepository(IBookRepository):
             async with self._context.create_session() as session:
                 async with session.begin():
                     await session.execute(query)
-                    await session.commit()
         except Exception as error:
             print(error) # changed to logger please
             return
         
-    async def save_books(self, books: List[BookEntity]):
-        # async with self._context.create_session() as session:
-        #     async with session.begin() as transaction:
-        #         try:
-        #             markers = ','.join('?' * len(values[0]))
-        #             ins = 'INSERT INTO {tablename} VALUES ({markers})'
-        #             ins = ins.format(tablename=widgets_table.name, markers=markers)
-        #             connection.execute(ins, values)
-        #         except:
-        #             transaction.rollback()
-        #             raise
-        #         else:
-        #             transaction.commit()
+    async def save_book(self, book: BookEntity):
+        try:
+            async with self._context.create_session() as session:
+                publisher: Optional[Publisher] = None
+                authors: List[Author] = list()
+                categories: List[Category] = list()
+                async with session.begin():
+                    if book.editor:
+                        if publisher_exists := (await session.execute(select(Publisher).where(Publisher.name == book.editor))).one_or_none():
+                            publisher = publisher_exists[0]
+                        else:
+                            publisher = Publisher(name=book.editor)
+                            session.add(publisher)
+                        
+                    if book.authors:
+                        authors: List[Author] = list()
+                        for author in book.authors:
+                            if author_exists := (await session.execute(select(Author).where(Author.name == author))).one_or_none():
+                                authors.append(author_exists[0])
+                            else:
+                                author = Author(name=author)
+                                authors.append(author)
+                                session.add(author)
+                        
+                    if book.categories:
+                        categories: List[Category] = list()
+                        for category in book.categories:
+                            if category_exists := (await session.execute(select(Category).where(Category.name == category))).one_or_none():
+                                categories.append(category_exists[0])
+                            else:
+                                category = Category(name=category)
+                                categories.append(category)
+                                session.add(category)
+                        
+                async with session.begin():
+                    _book = Book(
+                        id=book.id,
+                        title=book.title,
+                        subtitle=book.subtitle,
+                        description=book.description,
+                        publisher_date=book.datetime_publication,
+                        image=book.image_link,
+                        publisher=publisher,
+                        authors=authors,
+                        categories=categories
+                    )
+                    session.add(_book)
+        except Exception as error:
+            print(error) # changed to logger please
+            return

@@ -45,8 +45,9 @@ class BookService(IBookService):
         await self._book_repository.delete_book(id)
         
     async def save_books_external(self, books: List[BookEntity]):
-        print("tarea de persistencia...")
-        chunk_sections = Utils.chunk(books)
-        print(len(chunk_sections))
+        print("Initialize - save books of source external")
+        for book in books:
+            await self._book_repository.save_book(book)
+        print("Finished - save books of source external")
         
         
