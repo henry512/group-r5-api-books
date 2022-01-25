@@ -6,6 +6,7 @@ from src.infrastructure import IHttpClient, IPostgresContext
 from asyncio import gather
 from json import loads
 import hashlib
+import logging
 
 
 class IBookExternalRepository(ABC):
@@ -23,6 +24,7 @@ class BookExternalRepository(IBookExternalRepository):
     ):
         self._context = context
         self._http_client = http_client
+        self._log = logging.getLogger(f'{__name__}.{self.__class__.__name__}')
         self._base_url_google_books = (
             configuration["open_api"]["google_books"]["base_url"]
         )
@@ -81,7 +83,11 @@ class BookExternalRepository(IBookExternalRepository):
             http_data, http_status = (
                 await self._http_client.get(f"{self._base_url_google_books}{url_filtered}")
             )
-        except Exception:
+        except Exception as error:
+            self._log.exception(
+                "An error occurred while trying to query the external data repository",
+                exc_info=error
+            )
             return books
         
         if http_status == 200:
@@ -173,7 +179,11 @@ class BookExternalRepository(IBookExternalRepository):
             http_data, http_status = (
                 await self._http_client.get(url_filtered)
             )
-        except Exception:
+        except Exception as error:
+            self._log.exception(
+                "An error occurred while trying to query the external data repository",
+                exc_info=error
+            )
             return books
         
         if http_status == 200:

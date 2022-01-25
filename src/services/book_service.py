@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from src.domains import BookFiltered, BookDTO, BookEntity
 from src.repositories import IBookRepository, IBookExternalRepository
 from typing import List
-from src.utils import Utils
+import logging
 
 
 class IBookService(ABC):
@@ -27,6 +27,7 @@ class BookService(IBookService):
     ):
         self._book_repository = book_repository
         self._book_external_repository = book_external_repository
+        self._log = logging.getLogger(f'{__name__}.{self.__class__.__name__}')
     
     async def get_books(self, filters: BookFiltered) -> BookDTO:
         books_internal = await self._book_repository.get_books(filters)
@@ -45,9 +46,9 @@ class BookService(IBookService):
         await self._book_repository.delete_book(id)
         
     async def save_books_external(self, books: List[BookEntity]):
-        print("Initialize - save books of source external")
+        self._log.info("Initialize background task- save books of source external")
         for book in books:
             await self._book_repository.save_book(book)
-        print("Finished - save books of source external")
+        self._log.info("Finished background task - save books of source external")
         
         

@@ -10,7 +10,7 @@ class Container(containers.DeclarativeContainer):
     config = providers.Configuration(yaml_files=["config.yml"])
     logging = providers.Resource(
         fileConfig,
-        fname="logging.ini",
+        fname="logging.ini"
     )
     postgres_context = providers.Singleton(
         PostgresContext,

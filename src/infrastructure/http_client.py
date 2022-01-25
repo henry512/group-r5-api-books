@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional, Any, ByteString, Tuple
 from aiohttp import ClientSession
+import logging
 
 
 class IHttpClient(ABC):
@@ -24,13 +25,17 @@ class IHttpClient(ABC):
 class HttpClient(IHttpClient):
     def __init__(self):
         self._client_session: Optional[ClientSession] = None
+        self._log = logging.getLogger(f'{__name__}.{self.__class__.__name__}')
         
     async def get(self, url: str) -> Tuple[Optional[ByteString], int]:
         async with self._get_session_connection().get(url) as res:
             try:
                 return tuple([await res.read(), res.status])
             except Exception as error:
-                print(f"Http Client Exception has occurred: \n Error: {error} \n URL: {url} \n")
+                self._log.exception(
+                    f"Http Client Exception has occurred: URL: {url}",
+                    exc_info=error
+                )
                 raise
     
     async def post(self, url: str, data: Any) -> Tuple[Optional[ByteString], int]:

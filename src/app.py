@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from src.controllers import router_books
 from src.containers import Container
 
-
 description = """
 BooksApp Microservice Rest-http API. 🚀
 
@@ -28,5 +27,7 @@ app = FastAPI(
         "url": "https://www.apache.org/licenses/LICENSE-2.0.html",
     },
 )
-app.container = Container()
+container = Container()
+container.init_resources()
+app.container = container
 app.include_router(router_books)

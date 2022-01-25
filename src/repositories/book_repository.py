@@ -6,6 +6,7 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload, aliased
 from sqlalchemy import or_, delete, func
 from src.domains import Book, Publisher, Author, Category
+import logging
 
 
 class IBookRepository(ABC):
@@ -25,8 +26,19 @@ class IBookRepository(ABC):
 class BookRepository(IBookRepository):
     def __init__(self, context: IPostgresContext):
         self._context = context
+        self._log = logging.getLogger(f'{__name__}.{self.__class__.__name__}')
 
     async def get_books(self, filters: BookFiltered) -> BookDTO:
+        """[summary]
+            Obtiene todos los libros que coincidan con cualquiera de los
+            filtros pasados por [filters]
+            
+        Args:
+            filters (BookFiltered): filtros de consultas
+
+        Returns:
+            BookDTO
+        """
         books = BookDTO(books=list(), source=SourceEnum.internal)
         alias_author: Author = aliased(Author)
         alias_category: Category = aliased(Category)
@@ -81,7 +93,10 @@ class BookRepository(IBookRepository):
                 data = await session.execute(query)
                 result = data.all()
         except Exception as error:
-            print(error) # changed to logger please
+            self._log.exception(
+                "An error occurred while trying to query the data repository",
+                exc_info=error
+            )
             return books
         
         if result:
@@ -111,13 +126,9 @@ class BookRepository(IBookRepository):
     
     async def delete_book(self, id: str):
         query = delete(Book).where(Book.id == id)
-        try:
-            async with self._context.create_session() as session:
-                async with session.begin():
-                    await session.execute(query)
-        except Exception as error:
-            print(error) # changed to logger please
-            return
+        async with self._context.create_session() as session:
+            async with session.begin():
+                await session.execute(query)
         
     async def save_book(self, book: BookEntity):
         try:
@@ -167,5 +178,8 @@ class BookRepository(IBookRepository):
                     )
                     session.add(_book)
         except Exception as error:
-            print(error) # changed to logger please
+            self._log.exception(
+                "An error occurred while trying to persist in the data repository",
+                exc_info=error
+            )
             return
