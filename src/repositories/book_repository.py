@@ -17,6 +17,10 @@ class IBookRepository(ABC):
     async def delete_book(self, id: str):
         raise NotImplementedError
     
+    @abstractmethod
+    async def save_books(self, books: List[BookEntity]):
+        raise NotImplementedError
+    
 
 class BookRepository(IBookRepository):
     def __init__(self, context: IPostgresContext):
@@ -108,10 +112,24 @@ class BookRepository(IBookRepository):
     async def delete_book(self, id: str):
         query = delete(Book).where(Book.id == id)
         try:
-            async with self._context.get_session() as session:
+            async with self._context.create_session() as session:
                 async with session.begin():
                     await session.execute(query)
                     await session.commit()
         except Exception as error:
             print(error) # changed to logger please
             return
+        
+    async def save_books(self, books: List[BookEntity]):
+        # async with self._context.create_session() as session:
+        #     async with session.begin() as transaction:
+        #         try:
+        #             markers = ','.join('?' * len(values[0]))
+        #             ins = 'INSERT INTO {tablename} VALUES ({markers})'
+        #             ins = ins.format(tablename=widgets_table.name, markers=markers)
+        #             connection.execute(ins, values)
+        #         except:
+        #             transaction.rollback()
+        #             raise
+        #         else:
+        #             transaction.commit()
