@@ -9,7 +9,7 @@
 
 
 ## Introduction
-API Books es un proyecto de evaluación propuesto por Grupo R5 que comprende las funcionalidades y microservicios para el procesamiento y disponibilizacion de libros por medio de repositorios internos y/o externos(Google Books y OpenLibra)
+API Books es un proyecto de evaluación propuesto por Grupo R5 que comprende las funcionalidades y microservicios para el procesamiento y disponibilización de libros por medio de repositorios internos y/o externos(Google Books y OpenLibra)
 
 ## Getting Started
 1. pre requirements
