@@ -1,4 +1,3 @@
-from datetime import date
 from src.domains import OperatorEnum, BaseResponseDTO, BookFiltered, SourceEnum
 from typing import Optional
 from fastapi import APIRouter, status, Depends, Response, BackgroundTasks

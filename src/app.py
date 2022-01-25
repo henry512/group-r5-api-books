@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from src.controllers import router_books
 from src.containers import Container
+from fastapi.middleware.cors import CORSMiddleware
 
 description = """
 BooksApp Microservice Rest-http API. 🚀
@@ -30,4 +31,11 @@ app = FastAPI(
 container = Container()
 container.init_resources()
 app.container = container
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(router_books)
