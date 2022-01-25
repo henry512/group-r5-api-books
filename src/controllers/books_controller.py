@@ -20,7 +20,7 @@ async def get(
     subtitle: Optional[str]=None,
     author: Optional[str]=None,
     category: Optional[str]=None,
-    datetime_publication: Optional[date]=None,
+    datetime_publication: Optional[str]=None,
     editor: Optional[str]=None,
     description: Optional[str]=None,
     service: IBookService=Depends(Provide[Container.book_service])
