@@ -13,14 +13,13 @@ API Books es un proyecto de evaluación propuesto por Grupo R5 que comprende las
 
 ## Getting Started
 1. pre requirements
-  OS: Linux - Ubuntu
+  OS: Linux - Ubuntu <optional>
 3.	Installation process
 ```bash
 pip3 install virtualenv
 virtualenv env --python=python3.8
-. env/bin/activate
 source env/bin/activate
-pip3 install -r requirements/production.txt
+pip install -r requirements/development.txt
 
 # to deactivate venv
 deactivate
