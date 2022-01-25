@@ -29,3 +29,21 @@ deactivate
 ```bash
 python manage.py
 ```
+
+## Build and Test
+
+### Install Requirements Test
+```bash
+pip install -r requirements/development.txt
+```
+### Run Test
+```bash
+pytest -vs test
+```
+### Run Test and Coverage
+```bash
+pytest -v --cov src --cov-report html test
+```
+### Run Test and Coverage include file .coveragerc
+```bash
+pytest -v --cov src --cov-report html --cov-config=.coveragerc test

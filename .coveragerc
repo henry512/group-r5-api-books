@@ -1,0 +1,13 @@
+[run]
+omit=
+    */__init__.py
+    */abstracts/*
+    src/domains/*
+    src/infrastructure/*
+    src/exceptions/*
+    src/containers.py
+    src/utils/*
+    src/app.py
+
+[html]
+directory = test/coverage_report
