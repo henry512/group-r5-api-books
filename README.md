@@ -4,7 +4,7 @@
 Proyecto de evaluación propuesto por Grupo R5
 
 ## Introduction
-API Books comprende las funcionalidades y microservicios para el procesamiento y disponibilizacion de libros por medio de repositorios internos o externos(Google Books y OpenLibra)
+API Books comprende las funcionalidades y microservicios para el procesamiento y disponibilizacion de libros por medio de repositorios internos y/o externos(Google Books y OpenLibra)
 
 ## Getting Started
 1. pre requirements
