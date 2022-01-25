@@ -133,6 +133,10 @@ class BookRepository(IBookRepository):
     async def save_book(self, book: BookEntity):
         try:
             async with self._context.create_session() as session:
+                book_exists = (await session.execute(select(Book).where(Book.id == book.id))).one_or_none()
+                if book_exists:
+                    return
+                
                 publisher: Optional[Publisher] = None
                 authors: List[Author] = list()
                 categories: List[Category] = list()
