@@ -31,7 +31,6 @@ python manage.py
 ```
 
 ## Build and Test
-
 ### Install Requirements Test
 ```bash
 pip install -r requirements/test.txt
@@ -47,3 +46,9 @@ pytest -v --cov src --cov-report html test
 ### Run Test and Coverage include file .coveragerc
 ```bash
 pytest -v --cov src --cov-report html --cov-config=.coveragerc test
+```
+
+## Documentations
+- [`Swagger`](http://localhost:5000/docs)
+- [`Redocs`](http://localhost:5000/redoc)
+- extra docs: views ./docs/
