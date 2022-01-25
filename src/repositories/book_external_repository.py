@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Any, Coroutine
 from src.domains import BookFiltered, BookDTO, BookEntity, SourceEnum
 from dependency_injector.providers import Configuration
-from src.infrastructure import IHttpClient
+from src.infrastructure import IHttpClient, IPostgresContext
 from asyncio import gather
 from json import loads
 from uuid import uuid4
@@ -13,9 +13,19 @@ class IBookExternalRepository(ABC):
     async def get_books(self, filters: BookFiltered) -> BookDTO:
         raise NotImplementedError
     
+    @abstractmethod
+    async def save_books_external(self, books: List[BookEntity]):
+        raise NotImplementedError
+    
 
 class BookExternalRepository(IBookExternalRepository):
-    def __init__(self, http_client: IHttpClient, configuration: Configuration):
+    def __init__(
+        self, 
+        context: IPostgresContext,
+        http_client: IHttpClient,
+        configuration: Configuration
+    ):
+        self._context = context
         self._http_client = http_client
         self._base_url_google_books = (
             configuration["open_api"]["google_books"]["base_url"]
@@ -31,7 +41,7 @@ class BookExternalRepository(IBookExternalRepository):
         all_results = await gather(*async_calls)
         
         books = [book for books in all_results for book in books]
-        return BookDTO(books=books)
+        return BookDTO(books=books, source=SourceEnum.external)
     
     async def _get_books_of_google_books(self, filters: BookFiltered) -> List[BookEntity]:
         """[summary]
@@ -85,7 +95,6 @@ class BookExternalRepository(IBookExternalRepository):
                     editor = book["volumeInfo"].get("publisher"),
                     authors = set(book["volumeInfo"].get("authors", set())),
                     categories = set(book["volumeInfo"].get("categories", set())),
-                    source = SourceEnum.exteral
                 )
                 datetime_publication = book["volumeInfo"].get("publishedDate")
                 entity.datetime_publication = (
@@ -125,7 +134,7 @@ class BookExternalRepository(IBookExternalRepository):
         Returns:
             List[BookEntity]: [description]
         """
-        books: List[BookEntity] = []
+        books: List[BookEntity] = list()
         filtered_mappers = list()
         
         if filters.title:
@@ -164,7 +173,6 @@ class BookExternalRepository(IBookExternalRepository):
                     description = book.get("content_short"),
                     editor = book.get("publisher"),
                     image_link = book.get("thumbnail"),
-                    source = SourceEnum.exteral
                 )
                 datetime_publication = book.get("publisher_date")
                 entity.datetime_publication = (
@@ -187,3 +195,6 @@ class BookExternalRepository(IBookExternalRepository):
                 books.append(entity)
 
         return books
+
+    async def save_books_external(self, books: List[BookEntity]):
+        raise NotImplementedError

@@ -2,11 +2,10 @@ from abc import ABC, abstractmethod
 from typing import List
 from src.domains import BookFiltered, BookDTO, BookEntity, SourceEnum
 from src.infrastructure import IPostgresContext
-from pypika.queries import QueryBuilder
-from pypika import PostgreSQLQuery as Query, Table, Criterion, functions as fn
-from pypika.enums import JoinType
-from dependency_injector.providers import Configuration
-from datetime import datetime
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload, aliased
+from sqlalchemy import or_, delete
+from src.domains import Book, Publisher, Author, Category
 
 
 class IBookRepository(ABC):
@@ -20,56 +19,23 @@ class IBookRepository(ABC):
     
 
 class BookRepository(IBookRepository):
-    def __init__(self, context: IPostgresContext, configuration: Configuration):
+    def __init__(self, context: IPostgresContext):
         self._context = context
-        self._schema = configuration["database"]["schema"]
-        self._table_books = Table(
-            configuration["database"]["tables"]["books"], self._schema
-        )
-        self._table_authors = Table(
-            configuration["database"]["tables"]["authors"], self._schema
-        )
-        self._table_categories = Table(
-            configuration["database"]["tables"]["categories"], self._schema
-        )
-        self._table_publishing = Table(
-            configuration["database"]["tables"]["publishing"], self._schema
-        )
-        self._table_books_authors = Table(
-            configuration["database"]["tables"]["books_authors"], self._schema
-        )
-        self._table_books_categories = Table(
-            configuration["database"]["tables"]["books_categories"], self._schema
-        )
-    
+
     async def get_books(self, filters: BookFiltered) -> BookDTO:
-        query: QueryBuilder = (
-            Query.from_(self._table_books)
-            .select(
-                self._table_books.id,                
-                self._table_books.title,                
-                self._table_books.subtitle,                
-                self._table_books.description,                
-                self._table_books.image,                
-                self._table_books.publisher_date,                
-                self._table_authors.name.as_("authors"),
-                self._table_categories.name.as_("categories"),
-                self._table_publishing.name.as_("publishing"),
-            )
-            .join(self._table_books_authors, JoinType.inner)
-            .on(self._table_books.id == self._table_books_authors.book_id)
-            
-            .join(self._table_authors, JoinType.inner)
-            .on(self._table_books_authors.author_id == self._table_authors.id)
-            
-            .join(self._table_books_categories, JoinType.inner)
-            .on(self._table_books.id == self._table_books_categories.book_id)
-            
-            .join(self._table_categories, JoinType.inner)
-            .on(self._table_books_categories.category_id == self._table_categories.id)
-            
-            .join(self._table_publishing, JoinType.inner)
-            .on(self._table_books.publishing_id == self._table_publishing.id)
+        books = BookDTO(books=list(), source=SourceEnum.internal)
+        alias_author: Author = aliased(Author)
+        alias_category: Category = aliased(Category)
+        alias_publisher: Publisher = aliased(Publisher)
+        query = (
+            select(Book)
+            .options(selectinload(Book.publisher))
+            .options(selectinload(Book.authors))
+            .options(selectinload(Book.categories))
+            .join(alias_author, Book.authors)
+            .join(alias_category, Book.categories)
+            .join(alias_publisher, Book.publisher)
+            .distinct(Book.id)
         )
         
         # TODO: La aplicación de los siguientes filtros en una primera etapa de implementación
@@ -78,60 +44,74 @@ class BookRepository(IBookRepository):
         any_criterian = list()
         
         if filters.id:
-            any_criterian.append(self._table_books.id.like(f'%{str(filters.id)}%'))
+            any_criterian.append(Book.id.like(f"%{filters.id}%"))
             
         if filters.title:
-            any_criterian.append(self._table_books.title.like(f'%{str(filters.title)}%'))
+            any_criterian.append(Book.title.like(f"%{filters.title}%"))
             
         if filters.subtitle:
-            any_criterian.append(self._table_books.subtitle.like(f'%{str(filters.subtitle)}%'))
+            any_criterian.append(Book.subtitle.like(f"%{filters.subtitle}%"))
             
         if filters.description:
-            any_criterian.append(self._table_books.description.like(f'%{str(filters.description)}%'))
+            any_criterian.append(Book.description.like(f"%{filters.description}%"))
             
         if filters.datetime_publication:
-            any_criterian.append(self._table_books.publisher_date == filters.datetime_publication)
+            any_criterian.append(Book.publisher_date == filters.datetime_publication)
             
         if filters.author:
-            any_criterian.append(self._table_authors.name.like(f'%{str(filters.author)}%'))
+            any_criterian.append(alias_author.name.like(f"%{filters.author}%"))
             
         if filters.category:
-            any_criterian.append(self._table_categories.name.like(f'%{str(filters.category)}%'))
+            any_criterian.append(alias_category.name.like(f"%{filters.category}%"))
             
         if filters.editor:
-            any_criterian.append(self._table_publishing.name.like(f'%{str(filters.editor)}%'))
+            any_criterian.append(alias_publisher.name.like(f"%{filters.editor}%"))
+            
+        if not any_criterian:
+            return books
         
-        query = query.where(Criterion.any(any_criterian))
-        result = await self._context.find(query.get_sql())
+        query = query.where(or_(*any_criterian))
+
+        try:
+            async with self._context.create_session() as session:
+                data = await session.execute(query)
+                result = data.all()
+        except Exception as error:
+            print(error) # changed to logger please
+            return books
         
-        if not result.empty:
-            books_group = [groups for _, groups in result.groupby("id")]
-            books: List[BookEntity] = list()
-            for book in books_group:
-                books.append(
-                    BookEntity(
-                        id = book["id"][0],
-                        title = book["title"][0],
-                        subtitle = book["subtitle"][0],
-                        description = book["description"][0],
-                        datetime_publication = datetime.strptime(
-                            str(book["publisher_date"][0]), '%Y-%m-%d'
-                        ).date(),
-                        editor = book["publishing"][0],
-                        image_link = book["image"][0],
-                        authors = set(book["authors"].to_list()),
-                        categories = set(book["categories"].to_list()),
-                        source = SourceEnum.internal
-                    )
+        if result:
+            book_list: List[BookEntity] = list()
+            for row in result:
+                _book: Book = row[0]
+                book = BookEntity(
+                    id = _book.id,
+                    title = _book.title,
+                    subtitle = _book.subtitle,
+                    description = _book.description,
+                    datetime_publication = _book.publisher_date,
+                    image_link = _book.image,
                 )
-            return BookDTO(books=books)
+                if _book.publisher:
+                    book.editor = _book.publisher.name
+                    
+                if _book.authors:
+                    book.authors = set([author.name for author in _book.authors])
+                    
+                if _book.categories:
+                    book.categories = set([category.name for category in _book.categories])
+                book_list.append(book)
+            books.books = book_list
         
-        return BookDTO(books=[])
+        return books
     
     async def delete_book(self, id: str):
-        query: QueryBuilder = (
-            Query.from_(self._table_books)
-            .where(self._table_books.id == id)
-            .delete()
-        )
-        await self._context.execute_query(query.get_sql())
+        query = delete(Book).where(Book.id == id)
+        try:
+            async with self._context.get_session() as session:
+                async with session.begin():
+                    await session.execute(query)
+                    await session.commit()
+        except Exception as error:
+            print(error) # changed to logger please
+            return

@@ -1,13 +1,5 @@
 database:
-  connection: postgresql://postgres:root@localhost/postgres
-  schema: public
-  tables:
-    books: books
-    authors: authors
-    categories: categories
-    publishing: publishing
-    books_authors: books_authors
-    books_categories: books_categories
+  connection: postgresql+asyncpg://postgres:root@localhost/postgres
 open_api:
   google_books:
     base_url: https://www.googleapis.com/books/v1/volumes

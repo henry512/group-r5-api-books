@@ -1,7 +1,7 @@
 from datetime import date
-from src.domains import OperatorEnum, BaseResponseDTO, BookFiltered
+from src.domains import OperatorEnum, BaseResponseDTO, BookFiltered, SourceEnum
 from typing import Optional
-from fastapi import APIRouter, status, Depends, Response
+from fastapi import APIRouter, status, Depends, Response, BackgroundTasks
 from dependency_injector.wiring import inject, Provide
 from src.containers import Container
 from src.services import IBookService
@@ -13,6 +13,7 @@ router = APIRouter(prefix="/books", tags=["Books"])
 @router.get("/", response_model=BaseResponseDTO, status_code=status.HTTP_200_OK)
 @inject
 async def get(
+    backgroud_task: BackgroundTasks,
     operator: Optional[OperatorEnum]=OperatorEnum.contains,
     id: Optional[str]=None,
     title: Optional[str]=None, 
@@ -24,8 +25,6 @@ async def get(
     description: Optional[str]=None,
     service: IBookService=Depends(Provide[Container.book_service])
 ):
-    # TODO: agregar validación para que se implemente 1 filtro almenos
-    
     books = await service.get_books(
         BookFiltered(
             operator=operator,
@@ -39,11 +38,15 @@ async def get(
             description=description,
         )
     )
+    
+    if books.source == SourceEnum.external:
+        backgroud_task.add_task(service.save_books_external, books.books)
+        
     return BaseResponseDTO(
-        api_version="1.0.0", 
-        method=f"{__name__}.get", 
-        data=books
-    )
+            api_version="1.0.0", 
+            method=f"{__name__}.get", 
+            data=books
+        )
 
 
 @router.delete("/", status_code=status.HTTP_204_NO_CONTENT)
