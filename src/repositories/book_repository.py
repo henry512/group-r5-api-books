@@ -89,9 +89,7 @@ class BookRepository(IBookRepository):
         query = query.where(or_(*any_criterian))
 
         try:
-            async with self._context.create_session() as session:
-                data = await session.execute(query)
-                result = data.all()
+            result = await self._get_all_books_by_session(query)
         except Exception as error:
             self._log.exception(
                 "An error occurred while trying to query the data repository",
@@ -123,6 +121,11 @@ class BookRepository(IBookRepository):
             books.books = book_list
         
         return books
+    
+    async def _get_all_books_by_session(self, query):
+        async with self._context.create_session() as session:
+            data = await session.execute(query)
+            return data.all()
     
     async def delete_book(self, id: str):
         query = delete(Book).where(Book.id == id)
