@@ -48,9 +48,9 @@ class BookRepository(IBookRepository):
             .options(selectinload(Book.publisher))
             .options(selectinload(Book.authors))
             .options(selectinload(Book.categories))
-            .join(alias_author, Book.authors)
-            .join(alias_category, Book.categories)
-            .join(alias_publisher, Book.publisher)
+            .join(alias_author, Book.authors, isouter=True)
+            .join(alias_category, Book.categories, isouter=True)
+            .join(alias_publisher, Book.publisher, isouter=True)
             .distinct(Book.id)
         )
         
@@ -136,10 +136,6 @@ class BookRepository(IBookRepository):
     async def save_book(self, book: BookEntity):
         try:
             async with self._context.create_session() as session:
-                book_exists = (await session.execute(select(Book).where(Book.id == book.id))).one_or_none()
-                if book_exists:
-                    return
-                
                 publisher: Optional[Publisher] = None
                 authors: List[Author] = list()
                 categories: List[Category] = list()
