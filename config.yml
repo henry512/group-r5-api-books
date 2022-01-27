@@ -9,7 +9,7 @@ info:
   maintainer: Henry Jaimes <henry512apk@gmail.com>
 
 database:
-  connection: postgresql+asyncpg://postgres:root@localhost/postgres
+  connection: postgresql+asyncpg://postgres:4N45Ep8NTrq@ec2-18-229-245-105.sa-east-1.compute.amazonaws.com/postgres
 open_api:
   google_books:
     base_url: https://www.googleapis.com/books/v1/volumes
