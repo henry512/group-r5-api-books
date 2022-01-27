@@ -15,7 +15,7 @@ CREATE TABLE public.books (
 	subtitle varchar NULL,
 	description text NULL,
 	image varchar NULL,
-	publishing_id serial4 NULL,
+	publishing_id bigint NULL,
 	publisher_date varchar NULL,
 	CONSTRAINT books_pk PRIMARY KEY (id)
 );
