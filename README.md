@@ -49,6 +49,6 @@ pytest -v --cov src --cov-report html --cov-config=.coveragerc test
 ```
 
 ## Documentations
-- [`Swagger`](http://localhost:5000/docs)
-- [`Redocs`](http://localhost:5000/redoc)
+- [`Swagger`](http://ec2-18-229-245-105.sa-east-1.compute.amazonaws.com:5000/docs)
+- [`Redocs`](http://ec2-18-229-245-105.sa-east-1.compute.amazonaws.com:5000/redoc)
 - extra docs: views ./docs/
