@@ -56,5 +56,5 @@ pytest -v --cov src --cov-report html --cov-config=.coveragerc test
 ## Usage Example
 - [`GET Books`](http://ec2-18-229-245-105.sa-east-1.compute.amazonaws.com:5000/books/?author=david)
   curl --location --request GET 'http://ec2-18-229-245-105.sa-east-1.compute.amazonaws.com:5000/books/?author=david'
-Nota: Filtros validos para GET Books (id, title, subtitle, author, category, datetime_publication, editor, description)
+-- Nota: Filtros validos para GET Books (id, title, subtitle, author, category, datetime_publication, editor, description)
 - [`DELETE Book`] curl --location --request DELETE 'http://ec2-18-229-245-105.sa-east-1.compute.amazonaws.com:5000/books/?id=book3'
