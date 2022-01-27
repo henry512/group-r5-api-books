@@ -25,7 +25,6 @@ class Container(containers.DeclarativeContainer):
     )
     book_external_repository = providers.Singleton(
         BookExternalRepository,
-        context=postgres_context,
         http_client=http_client,
         configuration=config
     )

@@ -18,11 +18,9 @@ class IBookExternalRepository(ABC):
 class BookExternalRepository(IBookExternalRepository):
     def __init__(
         self, 
-        context: IPostgresContext,
         http_client: IHttpClient,
         configuration: Configuration
     ):
-        self._context = context
         self._http_client = http_client
         self._log = logging.getLogger(f'{__name__}.{self.__class__.__name__}')
         self._base_url_google_books = (
