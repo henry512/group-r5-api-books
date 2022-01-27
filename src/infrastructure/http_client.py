@@ -8,18 +8,6 @@ class IHttpClient(ABC):
     @abstractmethod
     async def get(self, url: str) -> Tuple[Optional[ByteString], int]:
         raise NotImplementedError
-
-    @abstractmethod
-    async def post(self, url: str, data: Any) -> Tuple[Optional[ByteString], int]:
-        raise NotImplementedError
-    
-    @abstractmethod
-    async def put(self, url: str, data: Any) -> Tuple[Optional[ByteString], int]:
-        raise NotImplementedError
-    
-    @abstractmethod
-    async def delete(self, url: str) -> Tuple[Optional[ByteString], int]:
-        raise NotImplementedError
     
     
 class HttpClient(IHttpClient):
@@ -37,15 +25,6 @@ class HttpClient(IHttpClient):
                     exc_info=error
                 )
                 raise
-    
-    async def post(self, url: str, data: Any) -> Tuple[Optional[ByteString], int]:
-        raise NotImplementedError
-    
-    async def put(self, url: str, data: Any) -> Tuple[Optional[ByteString], int]:
-        raise NotImplementedError
-    
-    async def delete(self, url: str) -> Tuple[Optional[ByteString], int]:
-        raise NotImplementedError
 
     def _get_session_connection(self) -> ClientSession:
         if self._client_session is None:
